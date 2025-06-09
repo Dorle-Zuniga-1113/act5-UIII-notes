@@ -9,33 +9,15 @@ class Notes extends StatefulWidget {
 }
 
 class _NotesState extends State<Notes> {
-  final titleController = TextEditingController();
-  final contentController = TextEditingController();
-  final CollectionReference notes = FirebaseFirestore.instance.collection('notes');
-
-  Future<void> addNote() async {
-    if (titleController.text.isEmpty || contentController.text.isEmpty) return;
-    
-    await notes.add({
-      'title': titleController.text.trim(),
-      'content': contentController.text.trim(),
-      'timestamp': FieldValue.serverTimestamp(),
-    });
-    
-    titleController.clear();
-    contentController.clear();
-  }
-
-  Future<void> deleteNote(String id) async {
-    await notes.doc(id).delete();
-  }
+  final titlecontrolller = TextEditingController();
+  final Contentcontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.pinkAccent,
-        title: const Text("MIS NOTAS"),
+        title: Text("MIS NOTAS"),
         centerTitle: true,
       ),
       body: Padding(
@@ -46,74 +28,97 @@ class _NotesState extends State<Notes> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
-                  const Text(
-                    "mis notas de mujer",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "mis notas de mujer",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   TextField(
-                    controller: titleController,
+                    controller: titlecontrolller,
                     decoration: InputDecoration(
                       labelText: 'Title',
                       hintText: 'Enter Title',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      prefixIcon: const Icon(Icons.title),
+                      prefixIcon: Icon(Icons.title),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   TextField(
-                    controller: contentController,
+                    controller: Contentcontroller,
                     decoration: InputDecoration(
                       labelText: 'Content',
                       hintText: 'Enter Content',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      prefixIcon: const Icon(Icons.text_fields),
+                      prefixIcon: Icon(Icons.text_fields),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: addNote,
-                    child: const Text('Save Notas'),
+                    onPressed: () {
+                      FirebaseFirestore.instance.collection('notes').add({
+                        'title': titlecontrolller.text.trim(),
+                        'content': Contentcontroller.text.trim(),
+                        'timestamp': FieldValue.serverTimestamp(),
+                      });
+                      titlecontrolller.clear();
+                      Contentcontroller.clear();
+                    },
+                    child: Text('Save Notas'),
                   ),
                 ],
               ),
             ),
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: notes.orderBy('timestamp', descending: true).snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text('No hay notas'));
-                  }
-
-                  return ListView.builder(
-                    itemCount: snapshot.data!.docs.length,
-                    itemBuilder: (context, index) {
-                      final doc = snapshot.data!.docs[index];
-                      return ListTile(
-                        title: Text(doc['title']),
-                        subtitle: Text(doc['content']),
-                        trailing: IconButton(
-                          onPressed: () => deleteNote(doc.id),
-                          icon: const Icon(Icons.delete_forever, color: Colors.red),
-                        ),
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('notes')
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (Context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return CircularProgressIndicator();
+                  } else {
+                    final docs = snapshot.data!.docs;
+                    if (docs.isEmpty) {
+                      return Text('No hay notas');
+                    } else {
+                      return ListView.builder(
+                        itemCount: docs.length,
+                        itemBuilder: (context, index) {
+                          final doc = docs[index];
+                          final title = doc['title'];
+                          final content = doc['content'];
+                          return ListTile(
+                            title: Text(title),
+                            subtitle: Text(content),
+                            trailing: IconButton(
+                              onPressed: () {
+                                FirebaseFirestore.instance
+                                    .collection('notes')
+                                    .doc(doc.id)
+                                    .delete();
+                              },
+                              icon: Icon(
+                                Icons.delete_forever,
+                                color: Colors.red,
+                              ),
+                            ),
+                          );
+                        },
                       );
-                    },
-                  );
+                    }
+                  }
                 },
               ),
             ),
