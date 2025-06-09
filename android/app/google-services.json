@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "566310935734",
+    "project_id": "notes-login-c4020",
+    "storage_bucket": "notes-login-c4020.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:566310935734:android:d2124d3993ee370eda1a17",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBFrYTPsBeQt0yFTGCeUF7D6p0l_rO7Vg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
